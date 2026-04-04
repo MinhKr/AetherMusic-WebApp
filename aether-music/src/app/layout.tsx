@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
-import { redirect } from "next/navigation";
 import "./globals.css";
 import { auth } from "@/auth";
 import Sidebar from "@/components/Sidebar";
 import MusicPlayer from "@/components/MusicPlayer";
+import { PlayerProvider } from "@/context/PlayerContext";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -42,17 +42,17 @@ export default async function RootLayout({
         className={`${spaceGrotesk.variable} ${manrope.variable} selection:bg-primary-container selection:text-on-primary-container`}
         style={{ fontFamily: "var(--font-manrope), Manrope, sans-serif" }}
       >
-        {session ? (
-          // Authenticated: show app shell
-          <>
-            <Sidebar user={session.user} />
-            <div className="ml-72">{children}</div>
-            <MusicPlayer accessToken={session.accessToken} />
-          </>
-        ) : (
-          // Not authenticated: only render children (login page)
-          <>{children}</>
-        )}
+        <PlayerProvider>
+          {/* Show shell if we're not on login page */}
+          {/* For now, just show it normally since we want full independent app behavior */}
+          <div className="flex bg-surface-dim min-h-screen text-on-surface">
+            <Sidebar user={session?.user} />
+            <div className="flex-1 ml-72">
+              {children}
+            </div>
+            <MusicPlayer />
+          </div>
+        </PlayerProvider>
       </body>
     </html>
   );

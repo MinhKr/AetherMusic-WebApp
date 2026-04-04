@@ -1,74 +1,96 @@
 "use client";
 
-import { useState } from "react";
+import { usePlayer } from "@/context/PlayerContext";
+import { useEffect, useState } from "react";
 
 const SPECTRUM_DELAYS = [0.1, 0.3, 0.2, 0.5, 0.4, 0.6, 0.15, 0.35];
 
-export default function MusicPlayer({ accessToken }: { accessToken?: string }) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
-  void accessToken; // will be used for Playback SDK later
+export default function MusicPlayer() {
+  const { activeSong, isPlaying, pauseSong, resumeSong, audioRef } = usePlayer();
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [volume, setVolume] = useState(0.7);
+
+  // Cập nhật thanh tiến trình theo thời gian thực
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleLoadedMetadata = () => setDuration(audio.duration);
+
+    audio.addEventListener("timeupdate", handleTimeUpdate);
+    audio.addEventListener("loadedmetadata", handleLoadedMetadata);
+
+    return () => {
+      audio.removeEventListener("timeupdate", handleTimeUpdate);
+      audio.removeEventListener("loadedmetadata", handleLoadedMetadata);
+    };
+  }, [audioRef]);
+
+  // Xử lý thay đổi âm lượng
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.volume = volume;
+    }
+  }, [volume, audioRef]);
+
+  const formatTime = (time: number) => {
+    const minutes = Math.floor(time / 60);
+    const seconds = Math.floor(time % 60);
+    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+  };
+
+  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const time = parseFloat(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  };
+
+  if (!activeSong) return null;
 
   return (
-    <footer className="futuristic-player">
+    <footer className="fixed bottom-0 left-0 right-0 z-50 flex items-center justify-between bg-surface-container-low/80 p-4 backdrop-blur-2xl border-t border-white/5 px-8">
       {/* Left: Track info */}
-      <div className="flex items-center gap-5">
+      <div className="flex w-[30%] items-center gap-5">
         <div className="relative group">
-          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary to-secondary blur opacity-25 transition duration-1000 group-hover:opacity-50" />
-          <div className="relative h-16 w-16 overflow-hidden rounded-2xl border border-white/10 bg-surface-container">
-            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/20 to-secondary/20">
-              <span className="material-symbols-outlined text-primary/50 text-3xl">music_note</span>
-            </div>
+          <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary to-secondary blur opacity-25" />
+          <div className="relative h-14 w-14 overflow-hidden rounded-2xl border border-white/10 bg-surface-container shadow-xl">
+             <img 
+               src={activeSong.image_url} 
+               alt={activeSong.title} 
+               className="h-full w-full object-cover"
+             />
           </div>
         </div>
         <div className="flex flex-col">
-          <h4 className="font-headline text-base font-bold tracking-tight text-white">
-            Shattered Glass
+          <h4 className="font-headline text-sm font-bold tracking-tight text-white truncate max-w-[200px]">
+            {activeSong.title}
           </h4>
-          <p className="font-label text-xs font-medium uppercase tracking-widest text-primary-dim/70">
-            Neon Ether
+          <p className="font-label text-[10px] font-medium uppercase tracking-widest text-primary-dim/70 truncate max-w-[200px]">
+            {activeSong.artist}
           </p>
         </div>
-        <button
-          onClick={() => setIsFavorited(!isFavorited)}
-          className="ml-2 rounded-full p-2 text-white/40 transition-all hover:bg-white/5 hover:text-red-400"
-        >
-          <span
-            className="material-symbols-outlined text-xl"
-            style={isFavorited ? { fontVariationSettings: "'FILL' 1" } : undefined}
-          >
-            favorite
-          </span>
-        </button>
       </div>
 
       {/* Center: Controls */}
-      <div className="relative flex max-w-md flex-1 flex-col items-center gap-3">
-        {/* Spectrum visualizer */}
-        <div className="absolute -top-4 flex items-end gap-1 opacity-20">
-          {SPECTRUM_DELAYS.map((delay, i) => (
-            <div
-              key={i}
-              className="spectrum-bar"
-              style={{ animationDelay: `${delay}s` }}
-            />
-          ))}
-        </div>
-
+      <div className="relative flex max-w-xl flex-1 flex-col items-center gap-2">
         {/* Playback buttons */}
         <div className="z-10 flex items-center gap-8">
           <button className="text-white/40 transition-colors hover:text-white">
-            <span className="material-symbols-outlined">shuffle</span>
+            <span className="material-symbols-outlined text-xl">shuffle</span>
           </button>
           <button className="text-white/80 transition-colors hover:text-primary">
             <span className="material-symbols-outlined text-3xl">skip_previous</span>
           </button>
           <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="glowing-orb"
+            onClick={isPlaying ? pauseSong : resumeSong}
+            className="flex h-12 w-12 items-center justify-center rounded-full bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.4)] transition-transform active:scale-90"
           >
             <span
-              className="material-symbols-outlined text-4xl"
+              className="material-symbols-outlined text-3xl"
               style={{ fontVariationSettings: "'FILL' 1" }}
             >
               {isPlaying ? "pause" : "play_arrow"}
@@ -78,38 +100,40 @@ export default function MusicPlayer({ accessToken }: { accessToken?: string }) {
             <span className="material-symbols-outlined text-3xl">skip_next</span>
           </button>
           <button className="text-white/40 transition-colors hover:text-white">
-            <span className="material-symbols-outlined">repeat</span>
+            <span className="material-symbols-outlined text-xl">repeat</span>
           </button>
         </div>
 
         {/* Progress bar */}
         <div className="flex w-full items-center gap-4 px-4">
-          <span className="font-label text-[10px] font-bold text-white/30">01:24</span>
-          <div className="group relative h-1.5 flex-1 overflow-hidden rounded-full bg-white/5">
-            <div className="absolute inset-0 translate-x-[-100%] bg-gradient-to-r from-transparent via-white/10 to-transparent transition-transform duration-1000 group-hover:translate-x-[100%]" />
-            <div className="absolute left-0 top-0 h-full w-1/3 rounded-full bg-gradient-to-r from-primary to-secondary shadow-[0_0_10px_rgba(0,255,255,0.5)]" />
-          </div>
-          <span className="font-label text-[10px] font-bold text-white/30">03:45</span>
+          <span className="font-label text-[10px] font-bold text-white/30 w-8">{formatTime(currentTime)}</span>
+          <input
+            type="range"
+            min="0"
+            max={duration || 0}
+            value={currentTime}
+            onChange={handleSeek}
+            className="h-1 flex-1 cursor-pointer appearance-none rounded-full bg-white/10 accent-primary"
+          />
+          <span className="font-label text-[10px] font-bold text-white/30 w-8">{formatTime(duration)}</span>
         </div>
       </div>
 
       {/* Right: Volume & extras */}
-      <div className="flex items-center gap-6">
+      <div className="flex w-[30%] items-center justify-end gap-6">
         <div className="group flex items-center gap-3 rounded-full border border-white/5 bg-white/5 px-4 py-2">
           <span className="material-symbols-outlined text-xl text-white/40 group-hover:text-primary">
-            volume_up
+            {volume === 0 ? "volume_off" : volume < 0.5 ? "volume_down" : "volume_up"}
           </span>
-          <div className="relative h-1 w-20 rounded-full bg-white/10">
-            <div className="absolute left-0 top-0 h-full w-3/4 rounded-full bg-primary/80" />
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button className="flex h-10 w-10 items-center justify-center rounded-full text-white/60 transition-all hover:bg-white/10 hover:text-primary">
-            <span className="material-symbols-outlined">queue_music</span>
-          </button>
-          <button className="flex h-10 w-10 items-center justify-center rounded-full text-white/60 transition-all hover:bg-white/10 hover:text-primary">
-            <span className="material-symbols-outlined">devices</span>
-          </button>
+          <input
+            type="range"
+            min="0"
+            max="1"
+            step="0.01"
+            value={volume}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="h-1 w-20 cursor-pointer appearance-none rounded-full bg-white/10 accent-primary"
+          />
         </div>
       </div>
     </footer>

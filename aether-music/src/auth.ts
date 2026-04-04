@@ -17,12 +17,20 @@ const SPOTIFY_SCOPES = [
 ].join(" ");
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
+  // Ensure that callback URLs always use the provided base URL instead of localhost
+  redirectProxyUrl: process.env.NODE_ENV === "development" && process.env.AUTH_URL 
+    ? `${process.env.AUTH_URL}/api/auth` 
+    : undefined,
   providers: [
     Spotify({
       clientId: process.env.SPOTIFY_CLIENT_ID,
       clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
       authorization: {
-        params: { scope: SPOTIFY_SCOPES },
+        url: "https://accounts.spotify.com/authorize",
+        params: {
+          scope: SPOTIFY_SCOPES,
+        },
       },
     }),
   ],

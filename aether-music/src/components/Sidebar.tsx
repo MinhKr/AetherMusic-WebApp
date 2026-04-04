@@ -8,6 +8,7 @@ import type { User } from "next-auth";
 
 const navItems = [
   { href: "/", label: "Discover", icon: "explore" },
+  { href: "/upload", label: "Upload", icon: "cloud_upload" },
   { href: "/library", label: "Library", icon: "library_music" },
   { href: "/stations", label: "Stations", icon: "radio" },
   { href: "/profile", label: "Profile", icon: "account_circle" },
