@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
+import { redirect } from "next/navigation";
 import "./globals.css";
+import { auth } from "@/auth";
 import Sidebar from "@/components/Sidebar";
 import MusicPlayer from "@/components/MusicPlayer";
 
@@ -21,11 +23,13 @@ export const metadata: Metadata = {
   description: "Aether Music — Your ethereal sonic experience",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+
   return (
     <html lang="en" className="dark">
       <head>
@@ -38,9 +42,17 @@ export default function RootLayout({
         className={`${spaceGrotesk.variable} ${manrope.variable} selection:bg-primary-container selection:text-on-primary-container`}
         style={{ fontFamily: "var(--font-manrope), Manrope, sans-serif" }}
       >
-        <Sidebar />
-        <div className="ml-72">{children}</div>
-        <MusicPlayer />
+        {session ? (
+          // Authenticated: show app shell
+          <>
+            <Sidebar user={session.user} />
+            <div className="ml-72">{children}</div>
+            <MusicPlayer accessToken={session.accessToken} />
+          </>
+        ) : (
+          // Not authenticated: only render children (login page)
+          <>{children}</>
+        )}
       </body>
     </html>
   );

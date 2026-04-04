@@ -1,7 +1,10 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
+import type { User } from "next-auth";
 
 const navItems = [
   { href: "/", label: "Discover", icon: "explore" },
@@ -10,7 +13,7 @@ const navItems = [
   { href: "/profile", label: "Profile", icon: "account_circle" },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ user }: { user?: User }) {
   const pathname = usePathname();
 
   return (
@@ -56,20 +59,37 @@ export default function Sidebar() {
       </nav>
 
       {/* User profile */}
-      <div className="p-6 mt-auto">
+      <div className="p-6 mt-auto space-y-2">
         <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3 outline outline-1 outline-white/10">
-          <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-tr from-primary to-secondary p-[2px]">
-            <div className="h-full w-full rounded-full bg-surface-container-high flex items-center justify-center overflow-hidden">
-              <span className="material-symbols-outlined text-primary/70 text-2xl">
-                account_circle
-              </span>
-            </div>
+          <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-tr from-primary to-secondary p-[2px] overflow-hidden">
+            {user?.image ? (
+              <Image
+                src={user.image}
+                alt={user.name ?? "User"}
+                width={40}
+                height={40}
+                className="h-full w-full rounded-full object-cover"
+              />
+            ) : (
+              <div className="h-full w-full rounded-full bg-surface-container-high flex items-center justify-center">
+                <span className="material-symbols-outlined text-primary/70 text-xl" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  account_circle
+                </span>
+              </div>
+            )}
           </div>
-          <div className="overflow-hidden">
-            <p className="truncate text-sm font-bold text-on-surface">Lyra Chen</p>
-            <p className="text-[10px] uppercase tracking-widest text-primary/70">Premium Hub</p>
+          <div className="overflow-hidden flex-1">
+            <p className="truncate text-sm font-bold text-on-surface">{user?.name ?? "Guest"}</p>
+            <p className="text-[10px] uppercase tracking-widest text-primary/70">Spotify</p>
           </div>
         </div>
+        <button
+          onClick={() => signOut({ callbackUrl: "/login" })}
+          className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors text-xs font-label"
+        >
+          <span className="material-symbols-outlined text-sm">logout</span>
+          Sign out
+        </button>
       </div>
     </aside>
   );

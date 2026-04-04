@@ -4,9 +4,10 @@ import { useState } from "react";
 
 const SPECTRUM_DELAYS = [0.1, 0.3, 0.2, 0.5, 0.4, 0.6, 0.15, 0.35];
 
-export default function MusicPlayer() {
+export default function MusicPlayer({ accessToken }: { accessToken?: string }) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
+  void accessToken; // will be used for Playback SDK later
 
   return (
     <footer className="futuristic-player">

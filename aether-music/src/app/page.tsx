@@ -1,36 +1,36 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
 import TopNav from "@/components/TopNav";
+import {
+  getNewReleases,
+  getFeaturedPlaylists,
+  getUserTopTracks,
+  getBestImage,
+  formatDuration,
+  type SpotifyAlbum,
+  type SpotifyPlaylist,
+  type SpotifyTrack,
+} from "@/lib/spotify";
 
-const trendingCards = [
-  {
-    id: 1,
-    title: "Global Top 50",
-    subtitle: "Updated 2h ago",
-    color: "from-primary/20 to-transparent",
-    icon: "trending_up",
-  },
-  {
-    id: 2,
-    title: "AI Curated",
-    subtitle: "Based on your recent aura",
-    color: "from-secondary/20 to-transparent",
-    icon: "auto_awesome",
-  },
-];
+export default async function DiscoverPage() {
+  const session = await auth();
+  if (!session?.accessToken) redirect("/login");
 
-const newReleases = [
-  { title: "Digital Void", artist: "Neon Ether", genre: "Synthwave" },
-  { title: "Phantom Signal", artist: "Echo Grid", genre: "Ambient" },
-  { title: "Stellar Drift", artist: "Orion Arc", genre: "Electronic" },
-  { title: "Neon Cascade", artist: "Lumina X", genre: "Future Bass" },
-];
+  const token = session.accessToken;
 
-const featuredPlaylists = [
-  { title: "Midnight Frequencies", tracks: 42, mood: "Focus" },
-  { title: "Stellar Journey", tracks: 28, mood: "Chill" },
-  { title: "Neon Pulse", tracks: 65, mood: "Energy" },
-];
+  const [newReleasesData, featuredData, topTracksData] = await Promise.all([
+    getNewReleases(token, 8).catch(() => null),
+    getFeaturedPlaylists(token, 6).catch(() => null),
+    getUserTopTracks(token, 5).catch(() => null),
+  ]);
 
-export default function DiscoverPage() {
+  const newReleases: SpotifyAlbum[] = newReleasesData?.albums?.items ?? [];
+  const featuredPlaylists: SpotifyPlaylist[] = featuredData?.playlists?.items ?? [];
+  const topTracks: SpotifyTrack[] = topTracksData?.items ?? [];
+
+  // Hero spotlight: dùng album đầu tiên
+  const heroAlbum = newReleases[0];
+
   return (
     <main className="mr-8 pb-36 pt-6">
       <TopNav placeholder="Search the nebula..." />
@@ -44,64 +44,93 @@ export default function DiscoverPage() {
 
         <div className="grid grid-cols-12 gap-6">
           {/* Hero card */}
-          <div className="col-span-8 group relative overflow-hidden rounded-3xl outline outline-1 outline-white/10 shadow-2xl" style={{ aspectRatio: "21/9" }}>
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-transparent" />
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className="relative">
-                <div className="h-40 w-40 rounded-full bg-gradient-to-br from-primary/30 to-secondary/30 blur-3xl" />
-                <span className="material-symbols-outlined absolute inset-0 flex items-center justify-center text-8xl text-primary/20" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  graphic_eq
-                </span>
-              </div>
-            </div>
+          <div
+            className="col-span-8 group relative overflow-hidden rounded-3xl outline outline-1 outline-white/10 shadow-2xl"
+            style={{ aspectRatio: "21/9" }}
+          >
+            {heroAlbum ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={getBestImage(heroAlbum.images, 640)}
+                alt={heroAlbum.name}
+                className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              />
+            ) : (
+              <div className="absolute inset-0 bg-gradient-to-br from-primary/10 via-secondary/5 to-transparent" />
+            )}
             <div className="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/40 to-transparent" />
             <div className="absolute bottom-0 left-0 flex w-full items-end justify-between p-10">
               <div>
                 <span className="mb-4 inline-block rounded-full bg-primary/20 px-3 py-1 font-label text-[10px] font-bold uppercase tracking-[0.2em] text-primary backdrop-blur-md">
-                  Artist Spotlight
+                  New Release
                 </span>
-                <h3 className="font-headline text-5xl font-extrabold leading-tight text-white">
-                  NEON
-                  <br />
-                  ETHER
-                </h3>
-                <p className="mt-2 max-w-md font-body text-white/70">
-                  Experience the pulse of the digital void with the latest album 'Shattered Glass'.
-                </p>
+                {heroAlbum ? (
+                  <>
+                    <h3 className="font-headline text-5xl font-extrabold leading-tight text-white">
+                      {heroAlbum.name.toUpperCase()}
+                    </h3>
+                    <p className="mt-2 max-w-md font-body text-white/70">
+                      {heroAlbum.artists.map((a) => a.name).join(", ")} · {heroAlbum.total_tracks} tracks
+                    </p>
+                  </>
+                ) : (
+                  <h3 className="font-headline text-5xl font-extrabold leading-tight text-white">
+                    DISCOVER
+                    <br />
+                    MUSIC
+                  </h3>
+                )}
               </div>
-              <button className="flex items-center gap-2 rounded-full bg-primary-container px-8 py-4 font-headline font-bold text-on-primary-fixed transition-all hover:shadow-[0_0_20px_rgba(0,255,255,0.5)]">
+              <a
+                href={heroAlbum?.external_urls.spotify}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-2 rounded-full bg-primary-container px-8 py-4 font-headline font-bold text-on-primary-fixed transition-all hover:shadow-[0_0_20px_rgba(0,255,255,0.5)]"
+              >
                 <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>
                   play_arrow
                 </span>
                 LISTEN NOW
-              </button>
+              </a>
             </div>
           </div>
 
-          {/* Side cards */}
-          <div className="col-span-4 grid grid-rows-2 gap-6">
-            {trendingCards.map((card) => (
-              <div
-                key={card.id}
-                className={`group relative overflow-hidden rounded-3xl bg-gradient-to-br ${card.color} p-6 backdrop-blur-2xl outline outline-1 outline-white/15 flex flex-col justify-between`}
-              >
-                <div className="relative z-10">
-                  <h4 className="mb-1 font-headline text-xl font-bold text-white">{card.title}</h4>
-                  <p className="mb-4 text-sm text-secondary">{card.subtitle}</p>
-                </div>
-                <button className="flex items-center gap-2 text-sm font-bold text-primary group-hover:underline">
-                  VIEW MIX
-                  <span className="material-symbols-outlined text-sm transition-transform group-hover:translate-x-1">
-                    arrow_forward
-                  </span>
-                </button>
-                <div className="absolute -bottom-4 -right-4 opacity-20 transition-transform duration-500 group-hover:scale-110">
-                  <span className="material-symbols-outlined text-[120px] text-primary" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    {card.icon}
-                  </span>
-                </div>
+          {/* Your Top Tracks */}
+          <div className="col-span-4 flex flex-col gap-3">
+            <div className="rounded-2xl bg-surface-container-low/40 backdrop-blur-2xl p-5 outline outline-1 outline-white/15 flex-1">
+              <h4 className="font-headline text-base font-bold text-white mb-3">Your Top Tracks</h4>
+              <div className="space-y-2">
+                {topTracks.map((track, i) => (
+                  <a
+                    key={track.id}
+                    href={track.external_urls.spotify}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-3 rounded-lg p-2 transition-colors hover:bg-white/5 group"
+                  >
+                    <span className="w-4 text-center font-label text-xs text-on-surface-variant">{i + 1}</span>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={getBestImage(track.album.images, 40)}
+                      alt={track.name}
+                      className="h-8 w-8 rounded object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate font-headline text-xs font-bold text-on-surface">{track.name}</p>
+                      <p className="truncate font-label text-[10px] text-on-surface-variant">
+                        {track.artists.map((a) => a.name).join(", ")}
+                      </p>
+                    </div>
+                    <span className="font-label text-[10px] text-on-surface-variant opacity-0 group-hover:opacity-100">
+                      {formatDuration(track.duration_ms)}
+                    </span>
+                  </a>
+                ))}
+                {topTracks.length === 0 && (
+                  <p className="text-xs text-on-surface-variant/60 text-center py-4">Play some music on Spotify first!</p>
+                )}
               </div>
-            ))}
+            </div>
           </div>
         </div>
       </section>
@@ -117,28 +146,35 @@ export default function DiscoverPage() {
           </button>
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {newReleases.map((release, i) => (
-            <div
-              key={i}
+          {newReleases.slice(0, 8).map((album) => (
+            <a
+              key={album.id}
+              href={album.external_urls.spotify}
+              target="_blank"
+              rel="noopener noreferrer"
               className="group relative overflow-hidden rounded-xl bg-surface-container-low/40 p-5 backdrop-blur-xl outline outline-1 outline-white/10 transition-all duration-300 hover:scale-[1.02] hover:outline-primary/30 hover:shadow-[0_0_20px_rgba(188,135,254,0.1)]"
             >
-              {/* Album art placeholder */}
-              <div className="mb-4 aspect-square w-full overflow-hidden rounded-xl bg-gradient-to-br from-primary/10 to-secondary/20 flex items-center justify-center">
-                <span className="material-symbols-outlined text-4xl text-primary/40" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  album
+              <div className="mb-4 aspect-square w-full overflow-hidden rounded-xl">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={getBestImage(album.images, 300)}
+                  alt={album.name}
+                  className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <h4 className="font-headline font-bold text-on-surface truncate">{album.name}</h4>
+              <p className="text-sm text-on-surface-variant truncate">
+                {album.artists.map((a) => a.name).join(", ")}
+              </p>
+              <p className="font-label text-[10px] text-on-surface-variant/60 mt-1">
+                {album.release_date.slice(0, 4)} · {album.total_tracks} tracks
+              </p>
+              <div className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-primary-container text-on-primary-fixed opacity-0 shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all group-hover:opacity-100">
+                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
+                  open_in_new
                 </span>
               </div>
-              <h4 className="font-headline font-bold text-on-surface">{release.title}</h4>
-              <p className="text-sm text-on-surface-variant">{release.artist}</p>
-              <span className="mt-2 inline-block rounded-full bg-secondary-container/50 px-2 py-0.5 font-label text-[10px] text-secondary">
-                {release.genre}
-              </span>
-              <button className="absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-primary-container text-on-primary-fixed opacity-0 shadow-[0_0_15px_rgba(0,255,255,0.4)] transition-all group-hover:opacity-100">
-                <span className="material-symbols-outlined text-lg" style={{ fontVariationSettings: "'FILL' 1" }}>
-                  play_arrow
-                </span>
-              </button>
-            </div>
+            </a>
           ))}
         </div>
       </section>
@@ -154,26 +190,42 @@ export default function DiscoverPage() {
           </button>
         </div>
         <div className="grid grid-cols-3 gap-6">
-          {featuredPlaylists.map((playlist, i) => (
-            <div
-              key={i}
-              className="group relative h-48 overflow-hidden rounded-2xl bg-surface-container-low/40 p-6 backdrop-blur-xl outline outline-1 outline-white/10 transition-all duration-300 hover:outline-primary/30"
+          {featuredPlaylists.map((playlist) => (
+            <a
+              key={playlist.id}
+              href={playlist.external_urls.spotify}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group relative h-48 overflow-hidden rounded-2xl bg-surface-container-low/40 backdrop-blur-xl outline outline-1 outline-white/10 transition-all duration-300 hover:outline-primary/30"
             >
+              {playlist.images[0] && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={playlist.images[0].url}
+                  alt={playlist.name}
+                  className="absolute inset-0 h-full w-full object-cover opacity-30 transition-opacity group-hover:opacity-50"
+                />
+              )}
+              <div className="absolute inset-0 bg-gradient-to-t from-surface-dim via-surface-dim/40 to-transparent" />
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-secondary/10 opacity-0 transition-opacity group-hover:opacity-100" />
-              <div className="relative z-10 flex h-full flex-col justify-between">
+              <div className="relative z-10 flex h-full flex-col justify-between p-6">
                 <div>
-                  <span className="font-label text-[10px] uppercase tracking-widest text-primary/70">{playlist.mood}</span>
-                  <h4 className="mt-1 font-headline text-xl font-bold text-white">{playlist.title}</h4>
-                  <p className="text-sm text-on-surface-variant">{playlist.tracks} tracks</p>
-                </div>
-                <button className="flex items-center gap-2 text-sm font-bold text-primary transition-all hover:gap-3">
-                  PLAY NOW
-                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
-                    play_circle
+                  <span className="font-label text-[10px] uppercase tracking-widest text-primary/70">
+                    {playlist.owner.display_name}
                   </span>
-                </button>
+                  <h4 className="mt-1 font-headline text-xl font-bold text-white line-clamp-2">
+                    {playlist.name}
+                  </h4>
+                  <p className="text-sm text-on-surface-variant">{playlist.tracks.total} tracks</p>
+                </div>
+                <span className="flex items-center gap-2 text-sm font-bold text-primary">
+                  OPEN IN SPOTIFY
+                  <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>
+                    open_in_new
+                  </span>
+                </span>
               </div>
-            </div>
+            </a>
           ))}
         </div>
       </section>
