@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { Space_Grotesk, Manrope } from "next/font/google";
 import "./globals.css";
-import { auth } from "@/auth";
 import Sidebar from "@/components/Sidebar";
 import MusicPlayer from "@/components/MusicPlayer";
 import { PlayerProvider } from "@/context/PlayerContext";
+import { createClient } from "@/lib/supabase/server";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -28,7 +28,8 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const session = await auth();
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
 
   return (
     <html lang="en" className="dark">
@@ -46,7 +47,7 @@ export default async function RootLayout({
           {/* Show shell if we're not on login page */}
           {/* For now, just show it normally since we want full independent app behavior */}
           <div className="flex bg-surface-dim min-h-screen text-on-surface">
-            <Sidebar user={session?.user} />
+            <Sidebar user={user as any} />
             <div className="flex-1 ml-72">
               {children}
             </div>

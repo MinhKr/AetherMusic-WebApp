@@ -1,11 +1,13 @@
-import { auth } from "@/auth";
+
 import TopNav from "@/components/TopNav";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/server";
 
 import SongCard from "@/components/SongCard";
 import HeroPlayButton from "@/components/HeroPlayButton";
 
 export default async function DiscoverPage() {
+  const supabase = await createClient();
+
   const { data: songs, error } = await supabase
     .from("songs")
     .select("*")
@@ -87,7 +89,7 @@ export default async function DiscoverPage() {
           </button>
         </div>
         <div className="grid grid-cols-4 gap-4">
-          {allSongs.map((song) => (
+          {allSongs.map((song: any) => (
             <SongCard key={song.id} song={song} />
           ))}
           {allSongs.length === 0 && (

@@ -3,11 +3,12 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { supabase } from "@/lib/supabase";
+import { createClient } from "@/lib/supabase/client";
 import TopNav from "@/components/TopNav";
 
 export default function UploadPage() {
   const router = useRouter();
+  const supabase = createClient();
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
