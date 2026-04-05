@@ -4,6 +4,8 @@ import "./globals.css";
 import Sidebar from "@/components/Sidebar";
 import MusicPlayer from "@/components/MusicPlayer";
 import { PlayerProvider } from "@/context/PlayerContext";
+import { LikedSongsProvider } from "@/context/LikedSongsContext";
+import { PlaylistProvider } from "@/context/PlaylistContext";
 import { createClient } from "@/lib/supabase/server";
 
 const spaceGrotesk = Space_Grotesk({
@@ -44,15 +46,19 @@ export default async function RootLayout({
         style={{ fontFamily: "var(--font-manrope), Manrope, sans-serif" }}
       >
         <PlayerProvider>
-          {/* Show shell if we're not on login page */}
-          {/* For now, just show it normally since we want full independent app behavior */}
-          <div className="flex bg-surface-dim min-h-screen text-on-surface">
-            <Sidebar user={user as any} />
-            <div className="flex-1 ml-72">
-              {children}
-            </div>
-            <MusicPlayer />
-          </div>
+          <LikedSongsProvider userId={user?.id}>
+            <PlaylistProvider>
+              {/* Show shell if we're not on login page */}
+              {/* For now, just show it normally since we want full independent app behavior */}
+              <div className="flex bg-surface-dim min-h-screen text-on-surface">
+                <Sidebar user={user as any} />
+                <div className="flex-1 ml-72">
+                  {children}
+                </div>
+                <MusicPlayer />
+              </div>
+            </PlaylistProvider>
+          </LikedSongsProvider>
         </PlayerProvider>
       </body>
     </html>

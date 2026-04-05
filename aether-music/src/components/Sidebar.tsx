@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
@@ -16,6 +16,8 @@ const navItems = [
 
 export default function Sidebar({ user }: { user?: User | null }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const currentView = searchParams.get("view");
   const supabase = createClient();
 
   const handleSignOut = async () => {
@@ -38,10 +40,16 @@ export default function Sidebar({ user }: { user?: User | null }) {
       {/* Navigation */}
       <nav className="flex-1 space-y-2 px-4">
         {navItems.map(({ href, label, icon }) => {
-          const isActive = pathname === href;
+          const isBaseRoute = href.split("?")[0];
+          const targetView = href.includes("view=") ? href.split("view=")[1] : null;
+          
+          const isActive = targetView 
+            ? (pathname === isBaseRoute && currentView === targetView)
+            : (pathname === isBaseRoute && !currentView);
+
           return (
             <Link
-              key={href}
+              key={label}
               href={href}
               className={`flex items-center gap-4 rounded-xl px-4 py-3 font-headline text-sm tracking-tight transition-all duration-300 ${
                 isActive
