@@ -61,7 +61,6 @@ Thay vì chỉ là một "giao diện" cho Spotify, việc xây dựng một ứ
 
 ## 6. Mục tiêu tiếp theo (Next Milestones)
 
-- [x] **Xác thực người dùng (Auth):** Thiết lập đăng ký/đăng nhập bằng Email/Password qua Supabase Auth để người dùng có Playlist riêng.
 - [ ] **Chức năng "Yêu thích":** Cho phép nhấn Tim ❤️ để lưu bài hát vào bảng `liked_songs`.
 - [ ] **Quản lý Playlist:** Tạo và chỉnh sửa danh sách phát cá nhân.
 - [ ] **Trang Library & Profile:** Hiển thị bài hát đã upload và danh sách yêu thích của riêng từng người dùng.
