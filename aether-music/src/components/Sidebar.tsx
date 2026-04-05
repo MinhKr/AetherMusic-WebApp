@@ -3,8 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { signOut } from "next-auth/react";
-import type { User } from "next-auth";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const navItems = [
   { href: "/", label: "Discover", icon: "explore" },
@@ -14,8 +14,14 @@ const navItems = [
   { href: "/profile", label: "Profile", icon: "account_circle" },
 ];
 
-export default function Sidebar({ user }: { user?: User }) {
+export default function Sidebar({ user }: { user?: User | null }) {
   const pathname = usePathname();
+  const supabase = createClient();
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    window.location.href = "/login";
+  };
 
   return (
     <aside className="fixed left-0 top-0 z-50 flex h-full w-64 flex-col rounded-r-2xl bg-[#0e0c1f]/40 backdrop-blur-3xl outline outline-1 outline-white/15 shadow-[0_20px_40px_rgba(0,0,0,0.4),0_0_20px_rgba(188,135,254,0.1)] my-4 ml-4 h-[calc(100vh-32px)]">
@@ -63,10 +69,10 @@ export default function Sidebar({ user }: { user?: User }) {
       <div className="p-6 mt-auto space-y-2">
         <div className="flex items-center gap-3 rounded-xl bg-white/5 p-3 outline outline-1 outline-white/10">
           <div className="h-10 w-10 flex-shrink-0 rounded-full bg-gradient-to-tr from-primary to-secondary p-[2px] overflow-hidden">
-            {user?.image ? (
+            {user?.user_metadata?.avatar_url ? (
               <Image
-                src={user.image}
-                alt={user.name ?? "User"}
+                src={user.user_metadata.avatar_url}
+                alt={user.email ?? "User"}
                 width={40}
                 height={40}
                 className="h-full w-full rounded-full object-cover"
@@ -80,12 +86,12 @@ export default function Sidebar({ user }: { user?: User }) {
             )}
           </div>
           <div className="overflow-hidden flex-1">
-            <p className="truncate text-sm font-bold text-on-surface">{user?.name ?? "Guest"}</p>
-            <p className="text-[10px] uppercase tracking-widest text-primary/70">Spotify</p>
+            <p className="truncate text-sm font-bold text-on-surface">{user?.email ?? "Guest"}</p>
+            <p className="text-[10px] uppercase tracking-widest text-primary/70">AetherMusic</p>
           </div>
         </div>
         <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
+          onClick={handleSignOut}
           className="w-full flex items-center gap-3 rounded-xl px-3 py-2 text-white/40 hover:text-white/70 hover:bg-white/5 transition-colors text-xs font-label"
         >
           <span className="material-symbols-outlined text-sm">logout</span>

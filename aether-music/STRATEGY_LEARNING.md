@@ -55,12 +55,13 @@ Thay vì chỉ là một "giao diện" cho Spotify, việc xây dựng một ứ
 | **04/04/2026** | ✅ Hoàn thành | **Thiết lập Database & Storage:** Tạo bảng `songs` và bucket `songs` để lưu trữ file thật. |
 | **04/04/2026** | ✅ Hoàn thành | **Music Player toàn cục:** Quản lý bài hát đang phát trên toàn App bằng `PlayerContext`. |
 | **04/04/2026** | ✅ Hoàn thành | **Hệ thống Upload "Nebula":** Trang `/upload` với giao diện Glassmorphism và hiệu ứng Neon, cho phép đẩy nhạc thật (.mp3) và ảnh lên hệ thống. |
+| **05/04/2026** | ✅ Hoàn thành | **Xác thực người dùng (Supabase SSR):** Gỡ bỏ Spotify NextAuth. Xây dựng trang Login/Signup hoàn chỉnh hỗ trợ Email/Password. Xử lý Middleware bảo vệ, kiểm tra trạng thái tự động và quản lý Session Cookie an toàn trên Edge. |
 
 ---
 
 ## 6. Mục tiêu tiếp theo (Next Milestones)
 
-- [ ] **Xác thực người dùng (Auth):** Thiết lập đăng ký/đăng nhập bằng Email/Password qua Supabase Auth để người dùng có Playlist riêng.
+- [x] **Xác thực người dùng (Auth):** Thiết lập đăng ký/đăng nhập bằng Email/Password qua Supabase Auth để người dùng có Playlist riêng.
 - [ ] **Chức năng "Yêu thích":** Cho phép nhấn Tim ❤️ để lưu bài hát vào bảng `liked_songs`.
 - [ ] **Quản lý Playlist:** Tạo và chỉnh sửa danh sách phát cá nhân.
 - [ ] **Trang Library & Profile:** Hiển thị bài hát đã upload và danh sách yêu thích của riêng từng người dùng.

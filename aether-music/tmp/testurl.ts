@@ -1,0 +1,1 @@
+import { NextRequest } from 'next/server'; const req = new NextRequest('http://localhost:3000/api/auth'); console.log(req.url); req.nextUrl.hostname = '127.0.0.1'; console.log(req.url); Object.defineProperty(req, 'url', { get: () => 'http://foo' }); console.log(req.url);
