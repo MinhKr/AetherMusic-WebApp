@@ -1,87 +1,39 @@
 import NextAuth from "next-auth";
-import Spotify from "next-auth/providers/spotify";
-
-// Scopes cần thiết để đọc dữ liệu Spotify
-const SPOTIFY_SCOPES = [
-  "user-read-email",
-  "user-read-private",
-  "user-top-read",
-  "user-read-recently-played",
-  "user-library-read",
-  "playlist-read-private",
-  "playlist-read-collaborative",
-  "streaming",
-  "user-read-playback-state",
-  "user-modify-playback-state",
-  "user-read-currently-playing",
-].join(" ");
+import Credentials from "next-auth/providers/credentials";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   trustHost: true,
-  // Ensure that callback URLs always use the provided base URL instead of localhost
-  redirectProxyUrl: process.env.NODE_ENV === "development" && process.env.AUTH_URL 
-    ? `${process.env.AUTH_URL}/api/auth` 
-    : undefined,
   providers: [
-    Spotify({
-      clientId: process.env.SPOTIFY_CLIENT_ID,
-      clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-      authorization: {
-        url: "https://accounts.spotify.com/authorize",
-        params: {
-          scope: SPOTIFY_SCOPES,
-        },
+    Credentials({
+      id: "guest",
+      name: "Guest",
+      credentials: {},
+      async authorize() {
+        // Luôn cho phép đăng nhập dưới tư cách khách
+        return {
+          id: "guest-user",
+          name: "Guest Traveler",
+          email: "guest@aether.music",
+          image: null,
+        };
       },
     }),
   ],
   callbacks: {
-    async jwt({ token, account }) {
-      // Lần đầu đăng nhập: lưu access token
-      if (account) {
-        token.accessToken = account.access_token;
-        token.refreshToken = account.refresh_token;
-        token.expiresAt = account.expires_at;
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
       }
-
-      // Token còn hạn → trả về nguyên
-      if (Date.now() < (token.expiresAt as number) * 1000) {
-        return token;
-      }
-
-      // Token hết hạn → refresh
-      return await refreshAccessToken(token);
+      return token;
     },
     async session({ session, token }) {
-      session.accessToken = token.accessToken as string;
-      session.error = token.error as string | undefined;
+      if (session.user) {
+        session.user.id = token.id as string;
+      }
       return session;
     },
   },
+  pages: {
+    signIn: "/login",
+  },
 });
-
-async function refreshAccessToken(token: Record<string, unknown>) {
-  try {
-    const response = await fetch("https://accounts.spotify.com/api/token", {
-      method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
-      body: new URLSearchParams({
-        grant_type: "refresh_token",
-        refresh_token: token.refreshToken as string,
-        client_id: process.env.SPOTIFY_CLIENT_ID!,
-        client_secret: process.env.SPOTIFY_CLIENT_SECRET!,
-      }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) throw data;
-
-    return {
-      ...token,
-      accessToken: data.access_token,
-      refreshToken: data.refresh_token ?? token.refreshToken,
-      expiresAt: Math.floor(Date.now() / 1000 + data.expires_in),
-    };
-  } catch {
-    return { ...token, error: "RefreshAccessTokenError" };
-  }
-}

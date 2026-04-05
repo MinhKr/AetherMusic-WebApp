@@ -81,7 +81,7 @@ export default function Sidebar({ user }: { user?: User }) {
           </div>
           <div className="overflow-hidden flex-1">
             <p className="truncate text-sm font-bold text-on-surface">{user?.name ?? "Guest"}</p>
-            <p className="text-[10px] uppercase tracking-widest text-primary/70">Spotify</p>
+            <p className="text-[10px] uppercase tracking-widest text-primary/70">Aether Citizen</p>
           </div>
         </div>
         <button

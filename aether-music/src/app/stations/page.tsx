@@ -1,13 +1,3 @@
-import { redirect } from "next/navigation";
-import { auth } from "@/auth";
-import {
-  getRecommendationsByGenre,
-  getUserTopArtists,
-  getBestImage,
-  formatDuration,
-  type SpotifyTrack,
-} from "@/lib/spotify";
-
 const GENRE_STATIONS = [
   { genre: "synth-pop", label: "Synth Pop", icon: "radio", mood: "Focus" },
   { genre: "ambient", label: "Ambient", icon: "waves", mood: "Chill" },
@@ -24,26 +14,10 @@ const moodColors: Record<string, string> = {
 };
 
 export default async function StationsPage() {
-  const session = await auth();
-  if (!session?.accessToken) redirect("/login");
-
-  const token = session.accessToken;
-
-  // Lấy top genres của user từ top artists
-  const topArtistsData = await getUserTopArtists(token, 5).catch(() => null);
-  const userGenres = topArtistsData?.items?.flatMap((a) => a.genres ?? []).slice(0, 5) ?? [];
-  const seedGenres = userGenres.length > 0 ? userGenres : ["pop", "electronic"];
-
-  // Recommendations dựa trên user's taste
-  const [featuredTracks, electronicTracks, ambientTracks] = await Promise.all([
-    getRecommendationsByGenre(token, seedGenres.slice(0, 3), 10).catch(() => null),
-    getRecommendationsByGenre(token, ["electronic", "synth-pop"], 8).catch(() => null),
-    getRecommendationsByGenre(token, ["ambient", "chill"], 8).catch(() => null),
-  ]);
-
-  const personalTracks: SpotifyTrack[] = featuredTracks?.tracks ?? [];
-  const elecTracks: SpotifyTrack[] = electronicTracks?.tracks ?? [];
-  const ambTracks: SpotifyTrack[] = ambientTracks?.tracks ?? [];
+  // Tạm thời để dữ liệu trống, giữ lại khung UI làm placeholder
+  const personalTracks: any[] = [];
+  const elecTracks: any[] = [];
+  const ambTracks: any[] = [];
 
   return (
     <main className="mr-8 pb-36 pt-6">
@@ -55,19 +29,9 @@ export default async function StationsPage() {
             <div className="mt-1 flex items-center gap-2">
               <span className="h-2 w-2 animate-pulse rounded-full bg-primary shadow-[0_0_8px_#00ffff]" />
               <span className="font-label text-xs uppercase tracking-widest text-primary">
-                Spotify Radio · Personalized for You
+                Aether Frequencies · Standalone Mode
               </span>
             </div>
-          </div>
-          <div className="relative group">
-            <span className="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-white/40 transition-colors group-focus-within:text-primary">
-              search
-            </span>
-            <input
-              className="w-64 rounded-full border-0 bg-surface-container-lowest/20 py-2.5 pl-12 pr-6 text-sm backdrop-blur-md outline outline-1 outline-white/15 focus:outline-primary/40 focus:ring-0"
-              placeholder="Search frequencies..."
-              type="text"
-            />
           </div>
         </header>
 
@@ -92,7 +56,7 @@ export default async function StationsPage() {
                   </div>
                 </div>
                 <h4 className="font-headline font-bold text-on-surface">{station.label}</h4>
-                <p className="mt-1 text-sm text-on-surface-variant">Curated via Spotify</p>
+                <p className="mt-1 text-sm text-on-surface-variant">Independent Stream</p>
                 <div className="mt-3 flex items-center justify-between">
                   <span className={`rounded-full px-2.5 py-0.5 font-label text-[10px] font-bold ${moodColors[station.mood]}`}>
                     {station.mood}
@@ -106,87 +70,22 @@ export default async function StationsPage() {
           </div>
         </section>
 
-        {/* Personalized recommendations */}
-        {personalTracks.length > 0 && (
-          <section className="mb-12">
-            <div className="mb-6 flex items-end justify-between">
-              <div>
-                <h3 className="font-headline text-2xl font-bold">Your Frequency</h3>
-                <p className="text-sm text-on-surface-variant mt-1">Based on your listening taste</p>
-              </div>
+        {/* Placeholder for personalized frequency */}
+        <section className="rounded-3xl glass-panel ghost-border p-12 flex flex-col items-center justify-center text-center">
+            <span className="material-symbols-outlined text-5xl text-primary/30 mb-4 animate-bounce">
+                leak_add
+            </span>
+            <h3 className="font-headline text-2xl font-bold">Frequency Unreachable</h3>
+            <p className="mt-2 text-on-surface-variant max-w-sm">
+                Personalized stations require a standalone profile. 
+                We are currently recalibrating the cosmic radio for independent broadcast.
+            </p>
+            <div className="mt-6 flex gap-3">
+                <span className="h-1.5 w-1.5 rounded-full bg-white/20" />
+                <span className="h-1.5 w-1.5 rounded-full bg-white/20" />
+                <span className="h-1.5 w-1.5 rounded-full bg-white/20" />
             </div>
-            <div className="rounded-2xl glass-panel ghost-border overflow-hidden">
-              {personalTracks.slice(0, 8).map((track, i) => (
-                <a
-                  key={track.id}
-                  href={track.external_urls.spotify}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center gap-4 px-6 py-4 transition-colors hover:bg-white/5"
-                >
-                  <span className="w-6 text-center font-label text-sm text-on-surface-variant">{i + 1}</span>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={getBestImage(track.album.images, 40)}
-                    alt={track.name}
-                    className="h-10 w-10 flex-shrink-0 rounded-lg object-cover"
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate font-headline font-bold text-on-surface text-sm">{track.name}</p>
-                    <p className="truncate text-xs text-on-surface-variant">
-                      {track.artists.map((a) => a.name).join(", ")}
-                    </p>
-                  </div>
-                  <span className="text-sm text-on-surface-variant hidden group-hover:block">{track.album.name}</span>
-                  <div className="w-12 h-1 rounded-full bg-white/10 mx-4">
-                    <div className="h-full rounded-full bg-primary" style={{ width: `${track.popularity}%` }} />
-                  </div>
-                  <span className="font-label text-xs text-on-surface-variant">{formatDuration(track.duration_ms)}</span>
-                  <span className="material-symbols-outlined text-sm text-primary opacity-0 group-hover:opacity-100">open_in_new</span>
-                </a>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* Electronic & Ambient rows */}
-        <div className="grid grid-cols-2 gap-8">
-          {[
-            { label: "Electronic", tracks: elecTracks },
-            { label: "Ambient & Chill", tracks: ambTracks },
-          ].map(({ label, tracks }) => (
-            <section key={label}>
-              <h3 className="mb-4 font-headline text-xl font-bold">{label}</h3>
-              <div className="space-y-2">
-                {tracks.slice(0, 6).map((track) => (
-                  <a
-                    key={track.id}
-                    href={track.external_urls.spotify}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group flex items-center gap-3 rounded-xl p-3 glass-panel ghost-border transition-colors hover:bg-white/5"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={getBestImage(track.album.images, 40)}
-                      alt={track.name}
-                      className="h-10 w-10 rounded-lg object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate font-headline text-sm font-bold text-on-surface">{track.name}</p>
-                      <p className="truncate text-xs text-on-surface-variant">
-                        {track.artists.map((a) => a.name).join(", ")}
-                      </p>
-                    </div>
-                    <span className="font-label text-xs text-on-surface-variant opacity-0 group-hover:opacity-100">
-                      {formatDuration(track.duration_ms)}
-                    </span>
-                  </a>
-                ))}
-              </div>
-            </section>
-          ))}
-        </div>
+        </section>
       </div>
     </main>
   );

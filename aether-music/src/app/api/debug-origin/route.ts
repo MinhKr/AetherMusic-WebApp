@@ -15,9 +15,9 @@ export async function GET(req: NextRequest) {
     // URL raw
     url: req.url,
 
-    // Dự đoán redirect_uri mà NextAuth sẽ gửi sang Spotify
+    // Dự đoán redirect_uri mà NextAuth sẽ gửi
     predicted_callback:
-      req.nextUrl.origin + "/api/auth/callback/spotify",
+      req.nextUrl.origin + "/api/auth/callback/guest",
   };
 
   // In ra terminal để dễ đọc
