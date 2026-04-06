@@ -1,0 +1,7 @@
+.claude/
+*.txt
+*.pdf
+settings.local.js.json
+node_modules/
+.next/
+.env.local
