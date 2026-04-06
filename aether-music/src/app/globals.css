@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  /* === Aether Neon Design Tokens === */
+  /* === Aether Neon Design Tokens (Sonic Ethereal) === */
   --color-primary: #c1fffe;
   --color-primary-dim: #00e6e6;
   --color-primary-fixed: #00f5f5;
@@ -60,10 +60,10 @@
   --color-outline: #76738b;
   --color-outline-variant: #48455b;
 
-  /* Fonts */
-  --font-headline: "Space Grotesk", sans-serif;
-  --font-body: "Manrope", sans-serif;
-  --font-label: "Manrope", sans-serif;
+  /* Fonts (Sonic Ethereal Dual-Font Strategy) */
+  --font-headline: "Space Grotesk", var(--font-space-grotesk), sans-serif;
+  --font-body: "Manrope", var(--font-manrope), sans-serif;
+  --font-label: "Manrope", var(--font-manrope), sans-serif;
 
   /* Border radius */
   --radius-DEFAULT: 0.25rem;
@@ -72,33 +72,84 @@
   --radius-2xl: 1rem;
   --radius-3xl: 1.5rem;
   --radius-full: 9999px;
+  
+  /* Layout constraints */
+  --sidebar-width: 280px;
 }
 
 body {
-  background: radial-gradient(circle at top right, #1f1c36, #0e0c1f);
+  background: radial-gradient(circle at top right, #1f1c36, #0e0c1f, #000);
+  background-attachment: fixed;
   font-family: var(--font-body);
   color: #e7e2fe;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-.material-symbols-outlined {
-  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
-  user-select: none;
-}
-
+/* --- High-End Glassmorphism Utilities --- */
 .glass-panel {
-  background: rgba(14, 12, 31, 0.4);
+  background: rgba(19, 17, 38, 0.4);
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
 }
 
-.ghost-border {
-  outline: 1px solid rgba(255, 255, 255, 0.15);
+.glass-panel-elevated {
+  background: rgba(37, 34, 62, 0.6);
+  backdrop-filter: blur(40px);
+  -webkit-backdrop-filter: blur(40px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(188, 135, 254, 0.1);
 }
 
-.primary-glow:hover {
-  box-shadow: 0 0 20px rgba(0, 255, 255, 0.3);
+.ghost-border {
+  outline: 1px solid rgba(72, 69, 91, 0.15); /* outline-variant at 15% opacity */
+}
+
+.ghost-border-glow:hover {
+  outline: 1px solid rgba(0, 255, 255, 0.3);
+  box-shadow: 0 0 15px rgba(0, 255, 255, 0.1);
+}
+
+/* --- Editorial Typography Scale --- */
+.text-editorial-lg {
+  font-family: var(--font-headline);
+  font-size: clamp(3rem, 10vw, 8rem);
+  line-height: 0.9;
+  letter-spacing: -0.04em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+.text-editorial-md {
+  font-family: var(--font-headline);
+  font-size: clamp(2rem, 5vw, 4rem);
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  font-weight: 700;
+  text-wrap: balance;
+}
+
+.text-gradient {
+  background: linear-gradient(to bottom right, #e7e2fe, #bc87fe, #c1fffe);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* --- Interactive Elements --- */
+.primary-glow-button {
+  background: var(--color-primary-container);
+  color: var(--color-on-primary-fixed);
+  transition: all 0.3s ease;
+  border-radius: var(--radius-2xl);
+  font-weight: 600;
+}
+
+.primary-glow-button:hover {
+  box-shadow: 0 0 25px rgba(0, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+.secondary-shadow {
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4), 0 0 20px rgba(188, 135, 254, 0.1);
 }
 
 .no-scrollbar::-webkit-scrollbar {
@@ -109,14 +160,14 @@ body {
   scrollbar-width: none;
 }
 
-/* Futuristic music player */
+/* --- Futuristic Music Player --- */
 .futuristic-player {
   position: fixed;
   bottom: 24px;
-  left: 50%;
+  left: calc(50% + 140px); /* Centered with respect to main content (minus half sidebar) */
   transform: translateX(-50%);
-  width: calc(100% - 300px);
-  max-width: 1200px;
+  width: calc(100% - 320px);
+  max-width: 1100px;
   background: linear-gradient(135deg, rgba(25, 23, 46, 0.7), rgba(14, 12, 31, 0.9));
   backdrop-filter: blur(32px);
   border: 1px solid rgba(255, 255, 255, 0.1);
@@ -128,14 +179,19 @@ body {
   align-items: center;
   justify-content: space-between;
   padding: 0 40px;
-  height: 100px;
+  height: 90px;
   z-index: 100;
   animation: float 6s ease-in-out infinite;
 }
 
+@keyframes float {
+  0%, 100% { transform: translateX(-50%) translateY(0px); }
+  50% { transform: translateX(-50%) translateY(-6px); }
+}
+
 .glowing-orb {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
   background: conic-gradient(from 180deg at 50% 50%, #00ffff, #bc87fe, #00ffff);
   display: flex;
@@ -149,7 +205,12 @@ body {
 }
 
 .glowing-orb:hover {
-  transform: scale(1.1);
+  transform: scale(1.15);
+}
+
+@keyframes pulse-glow {
+  0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), 0 0 40px rgba(188, 135, 254, 0.2); }
+  50% { box-shadow: 0 0 35px rgba(0, 255, 255, 0.8), 0 0 70px rgba(188, 135, 254, 0.5); }
 }
 
 .spectrum-bar {
@@ -159,19 +220,13 @@ body {
   animation: wave-height 1.2s ease-in-out infinite;
 }
 
-@keyframes float {
-  0%, 100% { transform: translateX(-50%) translateY(0px); }
-  50% { transform: translateX(-50%) translateY(-4px); }
-}
-
-@keyframes pulse-glow {
-  0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 255, 0.4), 0 0 40px rgba(188, 135, 254, 0.2); }
-  50% { box-shadow: 0 0 30px rgba(0, 255, 255, 0.7), 0 0 60px rgba(188, 135, 254, 0.4); }
-}
-
 @keyframes wave-height {
   0%, 100% { height: 8px; }
   50% { height: 24px; }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 12s linear infinite;
 }
 
 @keyframes spin-slow {
@@ -179,6 +234,12 @@ body {
   to { transform: rotate(360deg); }
 }
 
-.animate-spin-slow {
-  animation: spin-slow 8s linear infinite;
+/* Transitions */
+.page-transition {
+  animation: fadeIn 0.8s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }

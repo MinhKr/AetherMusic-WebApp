@@ -122,206 +122,215 @@ export default function UploadPage() {
   };
 
   return (
-    <main className="mr-8 pb-36 pt-6 min-h-screen">
-      <TopNav placeholder="Searching for sounds..." />
+    <main className="mr-8 pb-36 pt-4 page-transition min-h-screen">
+      <TopNav placeholder="Broadcasting signals..." />
 
-      <div className="max-w-4xl mx-auto px-8 py-12">
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-[2rem] bg-surface-container-low/40 p-12 backdrop-blur-3xl outline outline-1 outline-white/10 shadow-2xl"
-        >
-          {/* Background Decorative Glow */}
-          <div className="absolute -right-20 -top-20 h-64 w-64 rounded-full bg-primary/10 blur-[100px]" />
-          <div className="absolute -left-20 -bottom-20 h-64 w-64 rounded-full bg-secondary/10 blur-[100px]" />
+      <div className="max-w-7xl mx-auto px-12 py-12 relative">
+        {/* Background Decorative Glows */}
+        <div className="absolute -left-20 top-0 h-96 w-96 rounded-full bg-primary/10 blur-[150px] animate-pulse" />
+        <div className="absolute right-1/4 bottom-0 h-64 w-64 rounded-full bg-secondary/10 blur-[120px] animate-pulse" style={{ animationDelay: '1.5s' }} />
 
-          <header className="mb-12 text-center">
-            <h1 className="font-headline text-5xl font-extrabold tracking-tighter text-white">
-              UPLOAD TO <span className="text-primary italic">NEBULA</span>
-            </h1>
-            <p className="mt-2 text-on-surface-variant/70 font-body">
-              Broadcast your frequencies to the celestial network.
-            </p>
-          </header>
-
-          <form onSubmit={handleUpload} className="grid grid-cols-12 gap-10">
-            {/* Left: File Zones */}
-            <div className="col-span-12 lg:col-span-5 space-y-8">
-              {/* Audio Drop Zone */}
-              <div 
-                onDragEnter={handleDrag}
-                onDragLeave={handleDrag}
-                onDragOver={handleDrag}
-                onDrop={handleDrop}
-                onClick={() => audioInputRef.current?.click()}
-                className={`group relative flex aspect-square w-full cursor-pointer flex-col items-center justify-center rounded-3xl border-2 border-dashed transition-all duration-500 
-                  ${dragActive ? "border-primary bg-primary/5 scale-105" : "border-white/10 hover:border-primary/50 hover:bg-white/5"}
-                  ${file ? "border-solid border-primary/30" : ""}`}
-              >
-                <input 
-                  type="file" 
-                  ref={audioInputRef} 
-                  onChange={(e) => e.target.files && setFile(e.target.files[0])}
-                  className="hidden" 
-                  accept="audio/*" 
-                />
+        <div className="flex flex-col lg:flex-row gap-16 items-start">
+            {/* Left: Editorial Header & Instruction */}
+            <div className="w-full lg:w-1/3 z-10 sticky top-32">
+                <span className="mb-8 inline-flex items-center gap-3 rounded-full bg-white/5 pr-6 pl-2 py-2 font-label text-[10px] font-bold uppercase tracking-[0.4em] text-primary backdrop-blur-md outline outline-1 outline-white/10">
+                    <span className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-[#0e0c1f]">
+                        <span className="material-symbols-outlined text-sm" style={{ fontVariationSettings: "'FILL' 1" }}>uplink</span>
+                    </span>
+                    Signal Transmission
+                </span>
                 
-                <AnimatePresence mode="wait">
-                  {file ? (
-                    <motion.div 
-                      key="selected"
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="flex flex-col items-center text-center p-6"
-                    >
-                      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/20 text-primary shadow-[0_0_20px_rgba(0,255,255,0.3)]">
-                        <span className="material-symbols-outlined text-3xl">music_note</span>
-                      </div>
-                      <p className="font-headline font-bold text-white truncate max-w-full italic px-4">
-                        {file.name}
-                      </p>
-                      <button 
-                        type="button"
-                        onClick={(e) => { e.stopPropagation(); setFile(null); }}
-                        className="mt-4 text-[10px] font-bold uppercase tracking-widest text-primary hover:text-white"
-                      >
-                        Change File
-                      </button>
-                    </motion.div>
-                  ) : (
-                    <motion.div 
-                      key="empty"
-                      className="flex flex-col items-center text-center p-6"
-                    >
-                      <motion.div 
-                        animate={{ scale: [1, 1.1, 1] }}
-                        transition={{ repeat: Infinity, duration: 3 }}
-                        className="mb-4 flex h-20 w-20 items-center justify-center rounded-full bg-white/5 text-white/40 group-hover:text-primary transition-colors"
-                      >
-                        <span className="material-symbols-outlined text-4xl">cloud_upload</span>
-                      </motion.div>
-                      <p className="font-headline text-lg font-bold text-white">Drop Nebula Tracks</p>
-                      <p className="text-sm text-on-surface-variant mt-1 italic">MP3, WAV, FLAC</p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {/* Artwork Zone */}
-              <div 
-                onClick={() => imageInputRef.current?.click()}
-                className="group relative h-48 w-full cursor-pointer overflow-hidden rounded-2xl bg-surface-container-highest/30 outline outline-1 outline-white/10 hover:outline-secondary/50 transition-all"
-              >
-                <input 
-                  type="file" 
-                  ref={imageInputRef} 
-                  onChange={handleImageChange}
-                  className="hidden" 
-                  accept="image/*" 
-                />
+                <h1 className="text-editorial-md text-gradient mb-8 leading-[0.9]">
+                    UPLOAD TO<br />
+                    <span className="ml-12 italic text-on-surface">NEBULA</span>
+                </h1>
                 
-                {imagePreview ? (
-                  <img src={imagePreview} alt="Preview" className="h-full w-full object-cover" />
-                ) : (
-                  <div className="flex h-full flex-col items-center justify-center text-white/30 group-hover:text-secondary transition-colors">
-                    <span className="material-symbols-outlined text-3xl mb-2">add_photo_alternate</span>
-                    <span className="font-label text-[10px] font-bold uppercase tracking-[0.2em]">Add Essence</span>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
-                   <p className="font-label text-xs font-bold text-white uppercase tracking-widest">Change Image</p>
+                <p className="font-body text-lg text-on-surface-variant/80 leading-relaxed mb-12">
+                    Inject your sonic frequencies into the celestial collective. Our indexing machines will broadcast your resonance across the infinite expanse.
+                </p>
+
+                {/* Status Indicator */}
+                <div className="p-8 rounded-[32px] glass-panel ghost-border shadow-2xl relative overflow-hidden group">
+                    <div className="flex justify-between items-start mb-6">
+                        <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                            <span className="material-symbols-outlined text-primary">sensors</span>
+                        </div>
+                        <span className="text-[10px] font-black font-headline text-primary tracking-widest uppercase">Encryption Active</span>
+                    </div>
+                    <p className="font-headline text-lg font-bold leading-tight mb-1">Upload Integrity</p>
+                    <p className="font-label text-[10px] text-on-surface-variant tracking-[0.2em] uppercase mb-4">Signal Shielded</p>
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+                        <div className="w-[100%] h-full bg-primary shadow-[0_0_10px_#00ffff]" />
+                    </div>
                 </div>
-              </div>
             </div>
 
-            {/* Right: Inputs */}
-            <div className="col-span-12 lg:col-span-7 flex flex-col justify-between py-2">
-              <div className="space-y-8">
-                {/* Title */}
-                <div className="space-y-2">
-                  <label className="font-label text-[10px] font-bold uppercase tracking-[0.3em] text-primary/70 ml-1">
-                    Frequency Title
-                  </label>
-                  <input 
-                    type="text" 
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="E.g. Neon Dreams"
-                    className="w-full rounded-2xl bg-surface-container-highest/20 p-5 text-lg font-headline font-medium text-white outline outline-1 outline-white/10 focus:outline-primary/50 focus:bg-surface-container-highest/40 transition-all"
-                  />
-                </div>
+            {/* Right: Technical Form Interface */}
+            <div className="flex-1 z-10 w-full">
+                <form onSubmit={handleUpload} className="space-y-12">
+                    {/* Primary Technical Module: Drop Zones */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                        {/* Audio Drop Module */}
+                        <div 
+                            onDragEnter={handleDrag}
+                            onDragLeave={handleDrag}
+                            onDragOver={handleDrag}
+                            onDrop={handleDrop}
+                            onClick={() => audioInputRef.current?.click()}
+                            className={`group relative flex aspect-square flex-col items-center justify-center rounded-[3rem] border-2 border-dashed transition-all duration-700 
+                            ${dragActive ? "border-primary bg-primary/10 scale-[1.02]" : "border-white/10 glass-panel hover:border-primary/50 hover:bg-white/5"}
+                            ${file ? "border-solid border-primary/40 bg-surface-container-low/60" : ""}`}
+                        >
+                            <input 
+                            type="file" 
+                            ref={audioInputRef} 
+                            onChange={(e) => e.target.files && setFile(e.target.files[0])}
+                            className="hidden" 
+                            accept="audio/*" 
+                            />
+                            
+                            <AnimatePresence mode="wait">
+                            {file ? (
+                                <motion.div 
+                                key="selected"
+                                initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
+                                animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                                className="flex flex-col items-center text-center p-10"
+                                >
+                                <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-primary text-[#0e0c1f] shadow-[0_0_40px_rgba(0,255,255,0.4)]">
+                                    <span className="material-symbols-outlined text-4xl" style={{ fontVariationSettings: "'FILL' 1" }}>equalizer</span>
+                                </div>
+                                <p className="font-headline text-xl font-bold text-white mb-2 italic">
+                                    SIGNAL CAPTURED
+                                </p>
+                                <p className="text-sm font-label text-on-surface-variant font-bold uppercase tracking-widest truncate max-w-[200px]">
+                                    {file.name}
+                                </p>
+                                <button 
+                                    type="button"
+                                    onClick={(e) => { e.stopPropagation(); setFile(null); }}
+                                    className="mt-8 px-6 py-2 rounded-full border border-white/10 text-[10px] font-bold uppercase tracking-widest text-primary hover:bg-primary/10 hover:border-primary/30 transition-all"
+                                >
+                                    Eject Segment
+                                </button>
+                                </motion.div>
+                            ) : (
+                                <motion.div 
+                                key="empty"
+                                className="flex flex-col items-center text-center p-10"
+                                >
+                                <div className="mb-8 flex h-24 w-24 items-center justify-center rounded-full bg-white/5 border border-white/10 text-on-surface-variant/40 group-hover:text-primary group-hover:border-primary/40 transition-all duration-700">
+                                    <span className="material-symbols-outlined text-5xl">settings_input_antenna</span>
+                                </div>
+                                <h3 className="font-headline text-2xl font-bold text-white mb-2">Initialize Flow</h3>
+                                <p className="font-label text-xs font-bold text-on-surface-variant tracking-[0.2em] uppercase">Inject MP3/WAV/FLAC</p>
+                                </motion.div>
+                            )}
+                            </AnimatePresence>
+                        </div>
 
-                {/* Artist */}
-                <div className="space-y-2">
-                  <label className="font-label text-[10px] font-bold uppercase tracking-[0.3em] text-primary/70 ml-1">
-                    Cosmic Architect
-                  </label>
-                  <input 
-                    type="text" 
-                    value={artist}
-                    onChange={(e) => setArtist(e.target.value)}
-                    placeholder="Artist name..."
-                    className="w-full rounded-2xl bg-surface-container-highest/20 p-5 text-lg font-headline font-medium text-white outline outline-1 outline-white/10 focus:outline-primary/50 focus:bg-surface-container-highest/40 transition-all"
-                  />
-                </div>
+                        {/* Image Drop Module (Asymmetrical counterpart) */}
+                        <div 
+                            onClick={() => imageInputRef.current?.click()}
+                            className="group relative flex aspect-square flex-col items-center justify-center rounded-[3rem] glass-panel-elevated ghost-border transition-all duration-700 hover:scale-[1.02] cursor-pointer overflow-hidden"
+                        >
+                            <input 
+                            type="file" 
+                            ref={imageInputRef} 
+                            onChange={handleImageChange}
+                            className="hidden" 
+                            accept="image/*" 
+                            />
+                            
+                            {imagePreview ? (
+                                <>
+                                    <img src={imagePreview} alt="Preview" className="h-full w-full object-cover opacity-60 group-hover:scale-110 transition-transform duration-1000" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-surface to-transparent" />
+                                    <div className="absolute bottom-10 left-0 right-0 text-center">
+                                         <p className="font-label text-[10px] font-bold text-primary uppercase tracking-[0.4em] mb-4">Essence Acquired</p>
+                                         <span className="text-[10px] font-bold uppercase tracking-widest text-white/40 hover:text-white transition-colors">Replace Visage</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="flex h-full flex-col items-center justify-center text-on-surface-variant/40 group-hover:text-secondary transition-all duration-700">
+                                    <span className="material-symbols-outlined text-6xl mb-6" style={{ fontVariationSettings: "'FILL' 1" }}>nebula</span>
+                                    <h3 className="font-headline text-2xl font-bold text-white mb-2">Sonic Visage</h3>
+                                    <p className="font-label text-xs font-bold tracking-[0.2em] uppercase">Add Visual Essence</p>
+                                </div>
+                            )}
+                        </div>
+                    </div>
 
-                {/* Genre */}
-                <div className="space-y-2">
-                  <label className="font-label text-[10px] font-bold uppercase tracking-[0.3em] text-primary/70 ml-1">
-                    Sonic Spectrum
-                  </label>
-                  <select 
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
-                    className="w-full rounded-2xl bg-surface-container-highest/20 p-5 text-lg font-headline font-medium text-white outline outline-1 outline-white/10 focus:outline-primary/50 transition-all appearance-none"
-                  >
-                    <option value="Electronic">Electronic</option>
-                    <option value="Synthwave">Synthwave</option>
-                    <option value="Vaporwave">Vaporwave</option>
-                    <option value="Ambient">Ambient</option>
-                    <option value="Phonk">Phonk</option>
-                  </select>
-                </div>
-              </div>
+                    {/* Meta Technical Module: Fields */}
+                    <div className="p-12 rounded-[40px] glass-panel ghost-border grid grid-cols-1 md:grid-cols-2 gap-12 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 p-12 opacity-5 pointer-events-none">
+                            <span className="material-symbols-outlined text-9xl">dna</span>
+                        </div>
+                        
+                        {/* Title Input */}
+                        <div className="space-y-4">
+                            <label className="font-label text-[10px] font-bold uppercase tracking-[0.4em] text-primary/70 ml-2">
+                                Frequency ID
+                            </label>
+                            <input 
+                                type="text" 
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                placeholder="E.g. CELESTIAL_01"
+                                className="w-full rounded-2xl bg-white/5 p-6 text-xl font-headline font-bold text-white outline outline-1 outline-white/10 focus:outline-primary/50 focus:bg-white/10 transition-all placeholder:text-white/10"
+                            />
+                        </div>
 
-              {/* Submit Button */}
-              <motion.button 
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                disabled={uploading}
-                className="mt-12 group relative w-full overflow-hidden rounded-full bg-primary-container py-6 font-headline text-xl font-black tracking-[0.2em] text-on-primary-fixed shadow-[0_0_30px_rgba(0,255,255,0.2)] hover:shadow-[0_0_40px_rgba(0,255,255,0.4)] disabled:opacity-50 disabled:cursor-not-allowed group"
-              >
-                {uploading ? (
-                  <span className="flex items-center justify-center gap-3">
-                    <motion.span 
-                      animate={{ rotate: 360 }}
-                      transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-                      className="material-symbols-outlined"
-                    >
-                      progress_activity
-                    </motion.span>
-                    TRANSMITTING...
-                  </span>
-                ) : (
-                  <>
-                    <span className="relative z-10">LAUNCH TO NEBULA</span>
-                    <motion.div 
-                       animate={{ 
-                         x: ["-100%", "100%"] 
-                       }}
-                       transition={{ 
-                         repeat: Infinity, 
-                         duration: 2, 
-                         ease: "linear" 
-                       }}
-                       className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent italic"
-                    />
-                  </>
-                )}
-              </motion.button>
+                        {/* Artist Input */}
+                        <div className="space-y-4">
+                            <label className="font-label text-[10px] font-bold uppercase tracking-[0.4em] text-secondary/70 ml-2">
+                                Origin Point (Architect)
+                            </label>
+                            <input 
+                                type="text" 
+                                value={artist}
+                                onChange={(e) => setArtist(e.target.value)}
+                                placeholder="Conductor name..."
+                                className="w-full rounded-2xl bg-white/5 p-6 text-xl font-headline font-bold text-white outline outline-1 outline-white/10 focus:outline-secondary/50 focus:bg-white/10 transition-all placeholder:text-white/10"
+                            />
+                        </div>
+
+                        {/* Genre Input */}
+                        <div className="col-span-full space-y-4">
+                            <label className="font-label text-[10px] font-bold uppercase tracking-[0.4em] text-tertiary/70 ml-2">
+                                Spectrum resonance
+                            </label>
+                            <div className="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                                {["Electronic", "Synthwave", "Vaporwave", "Ambient", "Phonk"].map(g => (
+                                    <button
+                                        key={g}
+                                        type="button"
+                                        onClick={() => setGenre(g)}
+                                        className={`px-4 py-4 rounded-2xl font-headline font-bold text-xs uppercase tracking-widest transition-all ${genre === g ? "bg-primary text-[#0e0c1f] shadow-[0_0_15px_#00ffff]" : "bg-white/5 text-on-surface-variant hover:bg-white/10 outline outline-1 outline-white/5"}`}
+                                    >
+                                        {g}
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Launch Trigger */}
+                    <div className="flex justify-center pt-8">
+                        <button 
+                            disabled={uploading}
+                            className="group relative px-20 py-8 rounded-full overflow-hidden transition-all duration-500 hover:scale-[1.05] active:scale-95 disabled:opacity-50"
+                        >
+                            <div className="absolute inset-0 bg-primary shadow-[0_0_40px_rgba(0,255,255,0.4)] group-hover:shadow-[0_0_60px_rgba(0,255,255,0.6)] transition-all duration-500" />
+                            <div className="relative z-10 font-headline text-2xl font-black tracking-[0.4em] text-[#0e0c1f] uppercase">
+                                {uploading ? "TRANSMITTING..." : "LAUNCH TO NEBULA"}
+                            </div>
+                            <div className="absolute inset-x-0 bottom-0 h-1 bg-white/40 animate-pulse" />
+                        </button>
+                    </div>
+                </form>
             </div>
-          </form>
-        </motion.div>
+        </div>
       </div>
     </main>
   );
