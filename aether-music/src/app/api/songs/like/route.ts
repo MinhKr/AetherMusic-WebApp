@@ -16,28 +16,32 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Song ID is required' }, { status: 400 });
     }
 
-    // Check if it exists
+    // Check if already liked
     const { data: existingLike } = await supabase
       .from('liked_songs')
-      .select('id')
+      .select('user_id')
       .eq('user_id', user.id)
       .eq('song_id', song_id)
-      .single();
+      .maybeSingle();
 
     if (existingLike) {
-      // Unlike
+      // Unlike — delete existing record
       const { error } = await supabase
         .from('liked_songs')
         .delete()
-        .eq('id', existingLike.id);
+        .eq('user_id', user.id)
+        .eq('song_id', song_id);
 
       if (error) throw error;
       return NextResponse.json({ message: 'Unliked successfully', liked: false });
     } else {
-      // Like
+      // Like — upsert to handle race condition (duplicate click safety)
       const { error } = await supabase
         .from('liked_songs')
-        .insert({ user_id: user.id, song_id });
+        .upsert(
+          { user_id: user.id, song_id },
+          { onConflict: 'user_id,song_id', ignoreDuplicates: true }
+        );
 
       if (error) throw error;
       return NextResponse.json({ message: 'Liked successfully', liked: true });

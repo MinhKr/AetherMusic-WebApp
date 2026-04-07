@@ -26,6 +26,10 @@ Chúng ta đã chuyển đổi thành công từ một ứng dụng phụ thuộ
 - **Playlist Management:** Thêm/Xóa bài hát vào Playlist từ bất kỳ đâu thông qua Menu trên `SongCard`.
 - **Dynamic Tabs:** Sử dụng Search Params để chuyển đổi giữa Dashboard và Chi tiết Playlist mà không cần load lại trang.
 
+### ✨ Giao diện & Trải nghiệm Người dùng (UX/UI)
+- **Toast Notification System:** Hệ thống thông báo thông minh dạng Pill banner (Top-Center) với hiệu ứng Glassmorphism, phản hồi tức thì cho mọi hành động (Upload, Like, Playlist).
+- **Race Condition Optimization:** Giải quyết triệt để lỗi duplicate key khi người dùng tương tác nhanh (double-click) bằng cơ chế "Pending Lock" ở Frontend và "Upsert logic" ở Backend.
+
 ---
 
 ## 🛠️ 2. Tech Stack Hiện tại
@@ -51,6 +55,7 @@ Chúng ta đã chuyển đổi thành công từ một ứng dụng phụ thuộ
 | **05/04/2026** | ✅ Done | Hoàn thiện tính năng **Yêu thích** (Like/Unlike) với Optimistic UI. |
 | **05/04/2026** | ✅ Done | Tái thiết kế **Library Dashboard**, gộp Liked Songs và Sidebar. |
 | **05/04/2026** | ✅ Done | Triển khai **Custom Playlist System**: Tạo playlist và thêm nhạc linh hoạt. |
+| **07/04/2026** | ✅ Done | Thiết lập **Toast Notification System** toàn cục và tối ưu hóa **Race Condition** cho Like/Playlist. |
 
 ---
 

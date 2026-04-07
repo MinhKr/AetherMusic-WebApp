@@ -3,6 +3,7 @@
 import { usePlayer } from "@/context/PlayerContext";
 import { useLikedSongs } from "@/context/LikedSongsContext";
 import { usePlaylists } from "@/context/PlaylistContext";
+import { useToast } from "@/context/ToastContext";
 import { useState, useRef, useEffect } from "react";
 
 interface Song {
@@ -18,6 +19,7 @@ export default function SongCard({ song }: { song: Song }) {
   const { playSong, activeSong, isPlaying, pauseSong, resumeSong } = usePlayer();
   const { likedSongs, toggleLike } = useLikedSongs();
   const { playlists, addToPlaylist } = usePlaylists();
+  const { showToast } = useToast();
   
   const [showPlaylistMenu, setShowPlaylistMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -44,10 +46,24 @@ export default function SongCard({ song }: { song: Song }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const handleToggleLike = () => {
+    const willLike = !isLiked;
+    toggleLike(song.id);
+    if (willLike) {
+      showToast(`"${song.title}" added to Liked Songs`, "success", "favorite");
+    } else {
+      showToast(`"${song.title}" removed from Liked Songs`, "info", "heart_minus");
+    }
+  };
+
   const handleAddToPlaylist = async (playlistId: string) => {
+    const playlist = playlists.find((p) => p.id === playlistId);
     const success = await addToPlaylist(playlistId, song.id);
     if (success) {
       setShowPlaylistMenu(false);
+      showToast(`Added to "${playlist?.title ?? "Collection"}" ✓`, "success", "playlist_add_check");
+    } else {
+      showToast("Failed to add to collection.", "error");
     }
   };
 
@@ -78,7 +94,7 @@ export default function SongCard({ song }: { song: Song }) {
       {/* Top actions (Like / Playlist) — outside overflow-hidden to prevent clipping */}
       <div className={`absolute top-10 left-6 right-6 flex justify-between px-4 transition-all duration-500 z-20 ${isLiked ? "opacity-100" : "opacity-0 group-hover:opacity-100 -translate-y-2 group-hover:translate-y-0"}`}>
            <button
-              onClick={(e) => { e.stopPropagation(); toggleLike(song.id); }}
+              onClick={(e) => { e.stopPropagation(); handleToggleLike(); }}
               className={`flex h-10 w-10 items-center justify-center rounded-full bg-surface-container-low/60 backdrop-blur-md outline outline-1 group/like transition-all ${isLiked ? "outline-primary/50 text-error shadow-[0_0_15px_rgba(255,110,132,0.3)]" : "outline-white/10 text-on-surface-variant hover:text-primary hover:outline-primary/30"}`}
           >
               <span className={`material-symbols-outlined text-xl ${isLiked ? "scale-110" : "scale-100"}`} style={{ fontVariationSettings: isLiked ? "'FILL' 1" : "'FILL' 0" }}>

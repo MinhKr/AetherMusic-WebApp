@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/context/ToastContext";
 
 interface CreatePlaylistModalProps {
   isOpen: boolean;
@@ -14,6 +15,7 @@ export default function CreatePlaylistModal({ isOpen, onClose }: CreatePlaylistM
   const [description, setDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const { showToast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,13 +31,14 @@ export default function CreatePlaylistModal({ isOpen, onClose }: CreatePlaylistM
 
       if (!response.ok) throw new Error('Failed to create playlist');
 
+      showToast(`Habitat "${title}" established!`, "success", "hub");
       setTitle("");
       setDescription("");
       onClose();
       router.refresh();
     } catch (error) {
       console.error("Create playlist error:", error);
-      alert("Error: Không thể tạo habitat.");
+      showToast("Error: Could not establish habitat.", "error");
     } finally {
       setIsLoading(false);
     }

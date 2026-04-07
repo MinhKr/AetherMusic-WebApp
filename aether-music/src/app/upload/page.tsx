@@ -4,9 +4,11 @@ import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import TopNav from "@/components/TopNav";
+import { useToast } from "@/context/ToastContext";
 
 export default function UploadPage() {
   const router = useRouter();
+  const { showToast } = useToast();
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
@@ -55,7 +57,7 @@ export default function UploadPage() {
   const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file || !title || !artist) {
-      alert("Please fill in all fields and select a song file.");
+      showToast("Please fill in all fields and select a song file.", "error", "report");
       return;
     }
 
@@ -77,10 +79,10 @@ export default function UploadPage() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Upload failed");
 
-      router.push("/");
-      router.refresh();
+      showToast("Signal transmitted to Nebula!", "success", "rocket_launch");
+      setTimeout(() => { router.push("/"); router.refresh(); }, 1200);
     } catch (error: any) {
-      alert(error.message);
+      showToast(error.message || "Transmission failed.", "error");
     } finally {
       setUploading(false);
     }

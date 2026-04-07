@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useRef } from "react";
 
 interface LikedSongsContextType {
   likedSongs: Set<string>;
@@ -13,6 +13,7 @@ const LikedSongsContext = createContext<LikedSongsContextType | undefined>(undef
 export function LikedSongsProvider({ children, userId }: { children: React.ReactNode, userId?: string }) {
   const [likedSongs, setLikedSongs] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
+  const pendingRef = useRef<Set<string>>(new Set()); // lock per songId
 
   useEffect(() => {
     if (!userId) {
@@ -44,6 +45,9 @@ export function LikedSongsProvider({ children, userId }: { children: React.React
   }, [userId]);
 
   const toggleLike = async (songId: string) => {
+    // Prevent concurrent requests for the same song
+    if (pendingRef.current.has(songId)) return;
+    pendingRef.current.add(songId);
     const isCurrentlyLiked = likedSongs.has(songId);
 
     // Optimistic UI update
@@ -79,6 +83,8 @@ export function LikedSongsProvider({ children, userId }: { children: React.React
         }
         return newSet;
       });
+    } finally {
+      pendingRef.current.delete(songId); // release lock
     }
   };
 
