@@ -1,6 +1,7 @@
 import TopNav from "@/components/TopNav";
 import { createClient } from "@/lib/supabase/server";
 import SongCard from "@/components/SongCard";
+import HeroPlayButton from "@/components/HeroPlayButton";
 
 export default async function DiscoverPage() {
   const supabase = await createClient();
@@ -86,10 +87,7 @@ export default async function DiscoverPage() {
                     {/* Play button integrated into hero image corner */}
                     {heroSong && (
                          <div className="absolute bottom-10 right-10 flex flex-col items-end gap-4">
-                            <div className="h-14 w-14 rounded-full bg-white/5 backdrop-blur-xl border border-white/10 flex items-center justify-center group-hover:border-primary/40 transition-colors duration-500">
-                                <span className="material-symbols-outlined text-primary/80">play_arrow</span>
-                            </div>
-                            <p className="font-label text-[10px] font-bold uppercase tracking-[0.4em] text-white/40 group-hover:text-primary/60 transition-colors duration-500">INITIATE PLAYBACK</p>
+                            <HeroPlayButton song={heroSong} />
                          </div>
                     )}
                 </div>
@@ -117,10 +115,10 @@ export default async function DiscoverPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {allSongs.slice(1).map((song: any) => (
+          {allSongs.map((song: any) => (
             <SongCard key={song.id} song={song} />
           ))}
-          {allSongs.length <= 1 && (
+          {allSongs.length === 0 && (
             <div className="col-span-4 py-32 rounded-[40px] bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center">
               <span className="material-symbols-outlined text-6xl text-on-surface-variant/20 mb-4">music_off</span>
               <p className="text-on-surface-variant/40 italic font-medium">Empty orbits... The collection is currently clear.</p>

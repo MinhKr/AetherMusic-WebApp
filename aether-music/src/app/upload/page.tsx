@@ -3,12 +3,10 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { createClient } from "@/lib/supabase/client";
 import TopNav from "@/components/TopNav";
 
 export default function UploadPage() {
   const router = useRouter();
-  const supabase = createClient();
   const [uploading, setUploading] = useState(false);
   const [dragActive, setDragActive] = useState(false);
   
@@ -64,53 +62,20 @@ export default function UploadPage() {
     setUploading(true);
 
     try {
-      // 1. Upload Audio
-      const fileExt = file.name.split(".").pop();
-      const fileName = `${Math.random()}.${fileExt}`;
-      const filePath = `tracks/${fileName}`;
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("title", title);
+      formData.append("artist", artist);
+      formData.append("genre", genre);
+      if (image) formData.append("image", image);
 
-      const { error: uploadError } = await supabase.storage
-        .from("songs")
-        .upload(filePath, file);
+      const res = await fetch("/api/songs/upload", {
+        method: "POST",
+        body: formData,
+      });
 
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl: songUrl } } = supabase.storage
-        .from("songs")
-        .getPublicUrl(filePath);
-
-      // 2. Upload Image (if any)
-      let imageUrl = "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=800&q=80";
-      if (image) {
-        const imgExt = image.name.split(".").pop();
-        const imgName = `${Math.random()}.${imgExt}`;
-        const imgPath = `artworks/${imgName}`;
-
-        const { error: imgError } = await supabase.storage
-          .from("songs")
-          .upload(imgPath, image);
-
-        if (imgError) throw imgError;
-
-        const { data: { publicUrl: imgPublicUrl } } = supabase.storage
-          .from("songs")
-          .getPublicUrl(imgPath);
-        
-        imageUrl = imgPublicUrl;
-      }
-
-      // 3. Save to Database
-      const { error: dbError } = await supabase
-        .from("songs")
-        .insert({
-          title,
-          artist,
-          genre,
-          song_url: songUrl,
-          image_url: imageUrl,
-        });
-
-      if (dbError) throw dbError;
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Upload failed");
 
       router.push("/");
       router.refresh();
